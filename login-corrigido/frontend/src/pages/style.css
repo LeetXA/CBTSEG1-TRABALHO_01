@@ -1,0 +1,160 @@
+.page {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image: url('/imagens/login.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding: 20px;
+}
+
+.container {
+  background-color: rgba(255, 255, 255, 0.96);
+  padding: 34px 42px;
+  border-radius: 20px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
+  width: 100%;
+  max-width: 480px;
+  text-align: center;
+}
+
+.lab-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  margin-bottom: 18px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  background: #fff0f0;
+  color: #a00d0d;
+}
+
+h1 {
+  font-size: 28px;
+  color: #222;
+  margin: 0 0 5px;
+  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+}
+
+.subtitle {
+  color: #666;
+  margin: 0 0 25px;
+  font-size: 18px;
+}
+
+.input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.icon {
+  position: absolute;
+  left: 15px;
+  color: #777;
+  pointer-events: none;
+}
+
+input {
+  width: 100%;
+  padding: 12px 15px 12px 42px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  outline: none;
+  color: #333;
+  background-color: #fff;
+}
+
+input:focus { border-color: #52585c; }
+input:disabled { background: #f1f1f1; }
+
+button, .google-button {
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  cursor: pointer;
+  font-size: 16px;
+  text-decoration: none;
+}
+
+button {
+  background: #52585c;
+  color: white;
+  font-weight: bold;
+}
+
+button:hover:not(:disabled) { background: #42464a; }
+button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.erro {
+  color: #a00d0d;
+  margin: 12px 0 0;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 22px 0 14px;
+  color: #888;
+  font-size: 13px;
+}
+
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #ddd;
+}
+
+.google-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: white;
+  color: #333;
+  border: 1px solid #d0d0d0;
+  font-weight: 600;
+}
+
+.google-button:hover { background: #fafafa; }
+
+.google-g {
+  width: 22px;
+  height: 22px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  font-weight: 800;
+}
+
+.hint {
+  margin: 18px 0 0;
+  color: #777;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.construction-page { background-image: none; background-color: #f0f2f4; }
+.construction-card { max-width: 540px; }
+.construction-icon { font-size: 56px; margin-bottom: 8px; }
+.logged-user { color: #555; line-height: 1.6; margin: 18px 0; }
+
+@media (max-width: 600px) {
+  .container { padding: 26px 20px; border-radius: 15px; }
+  h1 { font-size: 22px; }
+  .subtitle { font-size: 15px; }
+  input, button, .google-button { font-size: 14px; }
+}
