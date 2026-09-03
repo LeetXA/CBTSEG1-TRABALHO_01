@@ -20,7 +20,7 @@ A aplicação mantém a mesma ideia da versão vulnerável: React no frontend, E
 ```bash
 cd backend
 npm install
-copy .env.example .env
+cp .env.example .env
 npm run seed
 npm run dev
 ```
