@@ -1,7 +1,5 @@
 # Login Corrigido — Demonstração de Segurança Web
 
-Projeto acadêmico para demonstrar a versão segura da mesma tela de login usada no laboratório de segurança.
-
 ## Proteções implementadas
 
 - **SQL Injection:** a consulta usa parâmetros (`?`) e nunca concatena a entrada do usuário na SQL.
