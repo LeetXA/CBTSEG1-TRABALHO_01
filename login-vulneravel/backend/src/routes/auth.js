@@ -2,6 +2,7 @@ import { Router } from "express";
 import crypto from "node:crypto";
 import { db } from "../db.js";
 import { csrfProtection, ensureCsrfToken } from "../middleware/csrf.js";
+import { OAuth2Client } from "google-auth-library";
 
 const router = Router();
 
@@ -10,6 +11,7 @@ const sessions = new Map();
 
 // Controle de tentativas por IP + matrícula.
 const attempts = new Map();
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 function getCookie(req, name) {
   const header = req.headers.cookie || "";
@@ -156,88 +158,50 @@ router.post("/logout", (req, res) => {
   return res.json({ message: "Logout realizado." });
 });
 
-// ---------------- Google OAuth 2.0 / OpenID Connect ----------------
-const oauthStates = new Map();
+// ---------------- Login com Google / Google Identity Services ----------------
 
-router.get("/google", (req, res) => {
-  const { GOOGLE_CLIENT_ID, GOOGLE_REDIRECT_URI } = process.env;
+router.post("/google", csrfProtection, async (req, res) => {
+  const { credential } = req.body ?? {};
 
-  if (!GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET || !GOOGLE_REDIRECT_URI) {
-    return res.status(503).send(
-      "Google Login não configurado. Preencha GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET e GOOGLE_REDIRECT_URI no backend/.env."
-    );
-  }
-
-  const state = crypto.randomBytes(24).toString("hex");
-  oauthStates.set(state, { createdAt: Date.now() });
-
-  const params = new URLSearchParams({
-    client_id: GOOGLE_CLIENT_ID,
-    redirect_uri: GOOGLE_REDIRECT_URI,
-    response_type: "code",
-    scope: "openid email profile",
-    state,
-    access_type: "online",
-    prompt: "select_account",
-  });
-
-  return res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`);
-});
-
-router.get("/google/callback", async (req, res) => {
-  const { code, state, error } = req.query;
-
-  if (error) {
-    return res.redirect(`${process.env.FRONTEND_URL || "http://localhost:5173"}/?oauth_error=${encodeURIComponent(error)}`);
-  }
-
-  const saved = oauthStates.get(state);
-  oauthStates.delete(state);
-
-  if (!state || !saved || Date.now() - saved.createdAt > 10 * 60 * 1000) {
-    return res.status(400).send("Estado OAuth inválido ou expirado.");
-  }
-
-  if (!code) {
-    return res.status(400).send("Código de autorização ausente.");
+  if (!credential) {
+    return res.status(400).json({
+      message: "Credencial do Google não enviada.",
+    });
   }
 
   try {
-    const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        code,
-        client_id: process.env.GOOGLE_CLIENT_ID,
-        client_secret: process.env.GOOGLE_CLIENT_SECRET,
-        redirect_uri: process.env.GOOGLE_REDIRECT_URI,
-        grant_type: "authorization_code",
-      }),
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
     });
 
-    const tokens = await tokenResponse.json();
-    if (!tokenResponse.ok) {
-      console.error("Google token error:", tokens);
-      return res.status(401).send("Não foi possível concluir o login com o Google.");
+    const payload = ticket.getPayload();
+
+    if (!payload?.sub || !payload?.email) {
+      return res.status(401).json({
+        message: "Token do Google inválido.",
+      });
     }
 
-    const userResponse = await fetch("https://openidconnect.googleapis.com/v1/userinfo", {
-      headers: { Authorization: `Bearer ${tokens.access_token}` },
+    const sessionId = createSession({
+      matricula: `google:${payload.sub}`,
+      provider: "google",
     });
 
-    const googleUser = await userResponse.json();
-    if (!userResponse.ok || !googleUser.email) {
-      return res.status(401).send("Não foi possível obter os dados do usuário Google.");
-    }
-
-    const matricula = `google:${googleUser.sub}`;
-    const sessionId = createSession({ matricula, provider: "google" });
     setSessionCookie(res, sessionId);
 
-    return res.redirect(`${process.env.FRONTEND_URL || "http://localhost:5173"}/sistema`);
+    return res.json({
+      message: "Login com Google realizado com sucesso.",
+      matricula: `google:${payload.sub}`,
+      email: payload.email,
+      nome: payload.name || "Usuário Google",
+    });
   } catch (error) {
-    console.error("Google OAuth error:", error);
-    return res.status(500).send("Erro interno ao autenticar com o Google.");
+    console.error("Erro ao validar token do Google:", error);
+
+    return res.status(401).json({
+      message: "Não foi possível validar o login com Google.",
+    });
   }
 });
 
