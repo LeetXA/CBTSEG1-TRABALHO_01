@@ -4,7 +4,6 @@
 
 ## 1. Backend
 ```bash
-cp .env.example .env
 npm run seed
 npm run dev
 ```
