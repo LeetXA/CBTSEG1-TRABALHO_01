@@ -34,7 +34,7 @@ O `npm run seed` garante estes usuários no banco:
 
 Depois de abrir a página normalmente, use o login local. Para demonstrar a falha, uma entrada de teste controlada é:
 
-- Matrícula: `' OR 1=1 -- `
+- Matrícula: ' OR 1=1 OR matricula='
 - Senha: qualquer valor
 
 A consulta vulnerável é montada no backend por concatenação direta da entrada do usuário.
