@@ -43,7 +43,7 @@ O script `npm run seed` migra automaticamente o banco caso as senhas ainda estej
 ## Como demonstrar a correção
 Use a mesma entrada que será utilizada na versão vulnerável, por exemplo:
 
-- Matrícula: `' OR 1=1 -- `
+- Matrícula: ' OR 1=1 OR matricula='
 - Senha: qualquer valor
 
 Nesta versão, essa entrada é tratada como **texto comum**. Ela não altera a estrutura da consulta porque a matrícula é enviada como parâmetro e a senha é comparada com `bcrypt`. O login deve falhar normalmente.
